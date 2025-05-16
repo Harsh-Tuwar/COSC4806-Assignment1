@@ -4,13 +4,13 @@
 
   session_start();
 
-  if (isset($_SESSION['authenticated']) && isset($_SESSION['authenticated']) == true) {
-    header('Location: index.php');
-    exit;
+  if (!isset($_SESSION['failed_attempts'])) {
+      $_SESSION['failed_attempts'] = 0; // init with 0
   }
 
-  if (isset($_SESSION['failed_attempts'])) {
-    $_SESSION['failed_attempts'] = 0; // init with 0
+  if (isset($_SESSION['authenticated']) && isset($_SESSION['authenticated']) == true) {
+    header('Location: index.php');
+    exit();
   }
 
   $error = '';
@@ -27,13 +27,15 @@
        header('Location: index.php');
        exit();
      } else {
-       $_SESSION['failed_attempts'] += 1;
+       $_SESSION['failed_attempts'] = $_SESSION['failed_attempts'] + 1;
        $error = 'Invalid username or password.';
      }
     } else {
       $error="Please enter username and password";
     }
   }
+
+  // print_r($_SESSION);
 ?>
 
 <form action="login.php" method="post">
@@ -41,8 +43,11 @@
       <p style="color:red;"><?= $error ?></p>
   <?php endif; ?>
   <?php 
-    echo $_SESSION['failed_attempts'] ?? "0"
+    echo "Failed Attempts: ";
+    echo $_SESSION['failed_attempts'] ?? "0";
+    ?> <br /> <?php
   ?>
+  <br />
   <div class="container">
     <label for="uname"><b>Username</b></label>
     <input type="text" placeholder="Enter Username" name="username" required>
